@@ -1,0 +1,4 @@
+ollama
+duckduckgo_search
+pyserial
+flask-socketio
