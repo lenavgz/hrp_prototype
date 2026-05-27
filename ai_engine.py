@@ -100,5 +100,5 @@ def run_ai_pipeline(user_prompt, b1_internet, b2_temp, b3_alignment):
 if __name__ == "__main__":
     # Test-Szenario: Internet AUS, Temperatur auf 0.7, Alignment AUS (unzensiert)
     print("Teste KI-Pipeline...")
-    ergebnis = run_ai_pipeline("Wies ist das Wetter heute in Salzburg", b1_internet=False, b2_temp=0.9, b3_alignment=True)
+    ergebnis = run_ai_pipeline("What color are dogs?", b1_internet=False, b2_temp=0.9, b3_alignment=True)
     print(ergebnis)
