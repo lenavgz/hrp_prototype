@@ -1,51 +1,69 @@
 import serial
 import time
-from ai_engine import run_pipeline
+import json
+import os
+from ai_engine import run_ai_pipeline # Ensure import matches your engine filename
 
-# Configure this to match your Arduino port ('COM3' on Windows, '/dev/tty.usbmodem...' on Mac)
 SERIAL_PORT = 'COM3' 
 BAUD_RATE = 9600
+STATE_FILE = 'hardware_state.json'
 
 try:
     arduino = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout=1)
     time.sleep(2) # Allow Arduino time to reset
-    print("[System] Hardware connected successfully!")
+    print("[Hardware-Bridge] Live Arduino connected successfully!")
 except Exception as e:
     print(f"[Warning] Could not open hardware port: {e}. Running in simulation mode.")
     arduino = None
 
 def parse_hardware_line(line):
-    # Parses: "B1:1,B2_ACT:1,TEMP:0.75,B3:0"
-    parts = line.strip().split(',')
-    data = {}
-    for part in parts:
-        key, val = part.split(':')
-        data[key] = float(val) if 'TEMP' in key else bool(int(val))
-    return data
+    try:
+        parts = line.strip().split(',')
+        data = {}
+        for part in parts:
+            if ':' not in part: continue
+            key, val = part.split(':')
+            
+            # Map Arduino keys to the exact configuration names your app.py expects
+            if key == "B1":      data["b1_internet"] = bool(int(val))
+            elif key == "B2_ACT": data["b2_active"] = bool(int(val))
+            elif key == "TEMP":   data["b2_temp"] = float(val)
+            elif key == "B3":     data["b3_alignment"] = bool(int(val))
+        return data
+    except Exception as e:
+        print(f"[Parsing Error] Error parsing line '{line}': {e}")
+        return None
 
-# Main loop checking for user queries while watching the physical board
+print("\n[System] Bridge is active. Listening to Arduino and updating hardware_state.json...")
+
+# CONTINUOUS BACKGROUND LOOP (No input() blocks!)
 while True:
-    user_input = input("\nType a prompt to test your layout (or 'exit'): ")
-    if user_input.lower() == 'exit':
-        break
-        
-    # Default fallback states if hardware is unplugged
-    states = {"B1": False, "B2_ACT": True, "TEMP": 0.7, "B3": True}
-    
     if arduino and arduino.in_waiting:
         try:
             raw_line = arduino.readline().decode('utf-8').strip()
-            states = parse_hardware_line(raw_line)
-            print(f"[Hardware Live State] {states}")
-        except Exception:
-            print("[Error] Failed to read hardware line, using defaults.")
-
-    # Execute the pipeline with live data
-    result = run_pipeline(
-        user_prompt=user_input,
-        b1_internet=states["B1"],
-        b2_prob_active=states["B2_ACT"],
-        b2_temp=states["TEMP"],
-        b3_alignment=states["B3"]
-    )
-    print("\n>>> Result:", result["text"])
+            if raw_line:
+                live_states = parse_hardware_line(raw_line)
+                
+                if live_states:
+                    print(f"[Live Serial Stream] {raw_line}")
+                    
+                    # 1. Load current JSON file if it exists
+                    current_data = {}
+                    if os.path.exists(STATE_FILE):
+                        try:
+                            with open(STATE_FILE, 'r') as f:
+                                current_data = json.load(f)
+                        except json.JSONDecodeError:
+                            pass
+                    
+                    # 2. Merge live Arduino data into the JSON
+                    current_data.update(live_states)
+                    
+                    # 3. Save it back instantly
+                    with open(STATE_FILE, 'w') as f:
+                        json.dump(current_data, f, indent=4)
+                        
+        except Exception as e:
+            print(f"[Error] Failed to read or save hardware state: {e}")
+            
+    time.sleep(0.05) # Keeps CPU usage perfectly low

@@ -31,32 +31,6 @@ def get_live_context(prompt):
         print(f"[Ollama-Search-Fehler]: {e}")
         return ""
 
-"""
-def get_live_context(prompt):
-    #Holt aktuelle Web-Daten über DuckDuckGo.
-    print(f"[System] Starte Websuche für: '{prompt}'...")
-    try:
-        # Die modernere und stabilere Syntax der Bibliothek:
-        results = DDGS().text(keywords=prompt, max_results=3)
-        
-        if not results:
-            print("[System] Keine Suchergebnisse gefunden.")
-            return ""
-            
-        # Wir sammeln die Textausschnitte (Snippets) der Webseiten
-        snippets = []
-        for r in results:
-            snippets.append(f"- {r['body']} (Quelle: {r['href']})")
-            
-        web_context = "\n".join(snippets)
-        print("[System] Websuche erfolgreich! Kontext wurde generiert.")
-        return web_context
-        
-    except Exception as e:
-        print(f"[Web-Fehler] Suche fehlgeschlagen: {e}")
-        return ""
-"""
-
 def run_ai_pipeline(user_prompt, b1_internet, b2_temp, b3_alignment):
     """
     Steuert die KI basierend auf den physischen Schaltern.
