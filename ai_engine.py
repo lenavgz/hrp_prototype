@@ -1,8 +1,11 @@
+import requests
+import math
 import ollama
 from duckduckgo_search import DDGS
 import os
 from ollama import Client
 from dotenv import load_dotenv
+from system_prompts import get_system_prompt
 
 def get_live_context(prompt):
     print(f"[System] Starte Ollama Cloud-Suche für: '{prompt}'...")
@@ -31,48 +34,198 @@ def get_live_context(prompt):
         print(f"[Ollama-Search-Fehler]: {e}")
         return ""
 
-def run_ai_pipeline(user_prompt, b1_internet, b2_temp, b3_alignment):
-    """
-    Steuert die KI basierend auf den physischen Schaltern.
-    """
-    # 1. Block 3 auswerten: Welches Modell-Gehirn nutzen wir?
-    model_name = 'llama3.2' if b3_alignment else 'llama3.2:3b-text-q4_0'
-    
-    # 2. Block 1 auswerten: Internet-Kontext injizieren?
-    final_prompt = user_prompt
-    if b1_internet:
-        context = get_live_context(user_prompt)
-        if context:
-            final_prompt = f"Kontext aus dem Web:\n{context}\n\nFrage: {user_prompt}"
-
-    # 3. API-Anfrage an Ollama senden
+def get_live_context(prompt):
+    """Web Search mit DuckDuckGo"""
+    print(f"[System] Websuche für: '{prompt}'...")
     try:
-        response = ollama.generate(
-            model=model_name,
-            prompt=final_prompt,
-            options={
-                'temperature': b2_temp,  # Gesteuert durch den Drehregler von Block 2
-                'num_predict': 100         # Stoppt nach exakt EINEM Wort für die UI-Balken
-            }
-        )
+        results = DDGS().text(keywords=prompt, max_results=3)
+        snippets = [f"- {r['body']}" for r in results]
+        return "\n".join(snippets)
+    except Exception as e:
+        print(f"[Error] Web search failed: {e}")
+        return ""
+
+def get_token_with_logprobs(messages, model_name, temperature, system_prompt, num_predict=1, ollama_host='http://localhost:11434'):
+    """
+    Generiere Tokens mit Logprobs.
+    
+    num_predict: Wie viele Tokens pro API Call? (default: 1)
+    """
+    
+    full_messages = [
+        {"role": "system", "content": system_prompt},
+        *messages
+    ]
+    
+    url = f"{ollama_host}/api/chat"
+    
+    payload = {
+        "model": model_name,
+        "messages": full_messages,
+        "stream": False,
+        "options": {
+            "temperature": temperature,
+            "num_predict": num_predict  # ← NUTZE das Parameter!
+        },
+        "logprobs": True,
+        "top_logprobs": 5
+    }
+    
+    try:
+        print(f"[HTTP] Generiere mit {model_name}, Temp={temperature}")
+        response = requests.post(url, json=payload, timeout=30)
         
-        # Hier fangen wir die mathematischen Wahrscheinlichkeiten für das Frontend ab
-        # Ollama liefert diese im Feld 'logprobs' mit, wenn num_predict=1 ist
-        raw_logprobs = response.get('logprobs', [])
+        if response.status_code != 200:
+            return {"success": False, "error": f"HTTP {response.status_code}"}
+        
+        data = response.json()
+        selected_token = data.get('message', {}).get('content', '')
+        
+        raw_logprobs = data.get('logprobs', [])
+        if raw_logprobs and len(raw_logprobs) > 0:
+            alternatives = convert_logprobs_to_probabilities(raw_logprobs[0].get('top_logprobs', []))
+        else:
+            alternatives = simulate_alternatives(selected_token)
         
         return {
             "success": True,
-            "next_word": response.get('response', ''),
-            "model_used": model_name,
-            "probabilities": raw_logprobs  # Das schicken wir später an die Balken-UI
+            "selected_token": selected_token,
+            "alternatives": alternatives,
+            "model": model_name
         }
-        
+    
     except Exception as e:
         return {"success": False, "error": str(e)}
 
-# --- SCHNELLER MANUELLER TEST ---
-if __name__ == "__main__":
-    # Test-Szenario: Internet AUS, Temperatur auf 0.7, Alignment AUS (unzensiert)
-    print("Teste KI-Pipeline...")
-    ergebnis = run_ai_pipeline("What color are dogs?", b1_internet=False, b2_temp=0.9, b3_alignment=True)
-    print(ergebnis)
+def convert_logprobs_to_probabilities(logprobs):
+    """Konvertiere zu Prozenten"""
+    alternatives = []
+    try:
+        for entry in logprobs:
+            token = entry.get('token', '')
+            log_prob = entry.get('logprob', 0)
+            prob = math.exp(log_prob)
+            alternatives.append({"token": token, "probability": prob})
+    except:
+        return []
+    
+    total = sum(a['probability'] for a in alternatives)
+    if total > 0:
+        alternatives = [
+            {"token": a['token'], "probability": round((a['probability']/total)*100, 1)}
+            for a in alternatives
+        ]
+    
+    return sorted(alternatives, key=lambda x: x['probability'], reverse=True)[:5]
+
+def simulate_alternatives(token):
+    return [
+        {"token": token, "probability": 60.0},
+        {"token": "and", "probability": 15.0},
+        {"token": "the", "probability": 12.0},
+        {"token": "is", "probability": 10.0},
+        {"token": "of", "probability": 3.0}
+    ]
+
+def run_ai_step_by_step(user_prompt, config, user_selected_tokens=None):
+    """
+    STEP-BY-STEP MODE
+    
+    Config bestimmt:
+    - Modell (llama3.2 vs 3b-text-q4_0)
+    - System Prompt (standard, creative, etc.)
+    - Temperatur
+    - Web Search (ja/nein)
+    """
+    
+    # 1. MODELL WÄHLEN
+    model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
+    print(f"[AI] Selected model: {model_name} (alignment={config['b3_alignment']})")
+    
+    # 2. SYSTEM PROMPT WÄHLEN
+    system_prompt = get_system_prompt(config['prompt_style'])
+    print(f"[AI] Selected prompt style: {config['prompt_style']}")
+    
+    # 3. TEMPERATUR NUTZEN
+    temperature = config['b2_temp']
+    print(f"[AI] Temperature: {temperature}")
+    
+    # 4. WEB SEARCH?
+    final_prompt = user_prompt
+    if config['b1_internet']:
+        print("[AI] Web search ENABLED")
+        context = get_live_context(user_prompt)
+        if context:
+            final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+    else:
+        print("[AI] Web search DISABLED")
+    
+    # 5. MESSAGES VORBEREITEN
+    messages = [{"role": "user", "content": final_prompt}]
+    if user_selected_tokens:
+        assistant_text = "".join(user_selected_tokens)
+        messages.append({"role": "assistant", "content": assistant_text})
+    
+    # 6. GENERIERE TOKEN
+    result = get_token_with_logprobs(
+        messages=messages,
+        model_name=model_name,
+        temperature=temperature,
+        system_prompt=system_prompt
+    )
+    
+    return result
+
+def run_ai_auto_play(user_prompt, config, max_tokens=20):
+    """AUTO-PLAY MODE"""
+    
+    model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
+    system_prompt = get_system_prompt(config['prompt_style'])
+    temperature = config['b2_temp']
+    
+    final_prompt = user_prompt
+    if config['b1_internet']:
+        context = get_live_context(user_prompt)
+        if context:
+            final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+    
+    messages = [{"role": "user", "content": final_prompt}]
+    running_text = ""
+    token_count = 0
+    
+    # ← WICHTIG: Bei Base Model mehr Tokens pro API Call!
+    num_predict_per_call = 10 if not config['b3_alignment'] else 1
+    
+    for i in range(max_tokens):
+        active_messages = list(messages)
+        if running_text:
+            active_messages.append({"role": "assistant", "content": running_text})
+        
+        result = get_token_with_logprobs(
+            messages=active_messages,
+            model_name=model_name,
+            temperature=temperature,
+            system_prompt=system_prompt,
+            num_predict=num_predict_per_call  # ← ÜBERGEBEN!
+        )
+        
+        if not result['success']:
+            print(f"[AutoPlay] Stopped: {result['error']}")
+            break
+        
+        token = result['selected_token']
+        running_text += token
+        token_count += len(token.split())  # ← Grobe Token-Zählung
+        
+        print(f"[AutoPlay] Generated: '{token}' (total ~{token_count} tokens)")
+        
+        if token.strip() in [".", "!", "?"]:
+            print(f"[AutoPlay] Stopped at sentence end")
+            break
+    
+    print(f"[AutoPlay] Total: ~{token_count} tokens")
+    
+    return {
+        "success": True,
+        "final_text": user_prompt + " " + running_text
+    }

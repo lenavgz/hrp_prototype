@@ -2,3 +2,5 @@ ollama
 duckduckgo_search
 pyserial
 flask-socketio
+python-dotenv
+requests

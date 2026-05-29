@@ -23,3 +23,12 @@ py ai_engine.py
 -> paste it in the .env folder 
 !!! do not upload your API key on github !!!
 per default .env folders are not pushed but check that 
+
+*** Simulator and Arduino ***
+# Simulator ist DEFAULT (true):
+$env:USE_SIMULATOR = "true"
+py app.py
+
+# Schalte auf echten Arduino:
+$env:USE_SIMULATOR = "false"
+py app.py
