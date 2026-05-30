@@ -4,8 +4,10 @@ from flask import Flask, render_template, request, jsonify
 from hardware_config import get_hardware_config
 from ai_engine import run_ai_step_by_step, run_ai_auto_play
 import json
+from flask_cors import CORS 
 
 app = Flask(__name__, template_folder='.')
+CORS(app) 
 
 @app.route('/')
 def home():

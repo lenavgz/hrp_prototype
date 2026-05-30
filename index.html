@@ -1,63 +1,209 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
-    <title>Hardware-KI Prototyp</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Prototype - Hardware Test UI</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
-            max-width: 600px;
-            margin: 50px auto;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
             padding: 20px;
-            background-color: #f4f4f9;
         }
         
         .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .card {
             background: white;
-            padding: 30px;
             border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .card h2 {
+            margin-bottom: 15px;
+            color: #667eea;
+            font-size: 18px;
         }
         
         textarea {
             width: 100%;
-            height: 100px;
-            margin-bottom: 15px;
+            height: 80px;
             padding: 10px;
-            border: 1px solid #ccc;
+            border: 1px solid #ddd;
             border-radius: 4px;
-            box-sizing: border-box;
+            font-family: monospace;
+            resize: none;
+            margin-bottom: 10px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
         }
         
         button {
-            background-color: #007bff;
-            color: white;
+            flex: 1;
+            padding: 10px 15px;
             border: none;
-            padding: 12px 20px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
         }
         
-        button:hover {
-            background-color: #0056b3;
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+        }
+        
+        .btn-secondary {
+            background: #764ba2;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #654891;
+        }
+        
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #38a169;
         }
         
         .output-box {
-            margin-top: 25px;
+            background: #f7fafc;
+            border-left: 4px solid #667eea;
             padding: 15px;
-            background: #e9ecef;
-            border-left: 5px solid #007bff;
             border-radius: 4px;
-            min-height: 50px;
+            margin-top: 10px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-family: monospace;
+            font-size: 12px;
             white-space: pre-wrap;
+            word-break: break-word;
         }
         
-        .meta-info {
+        .alternatives {
+            margin-top: 15px;
+        }
+        
+        .alternative {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .token {
+            min-width: 80px;
+            padding: 5px 10px;
+            background: #edf2f7;
+            border-radius: 3px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .bar-container {
+            flex: 1;
+            background: #e2e8f0;
+            border-radius: 3px;
+            height: 25px;
+            overflow: hidden;
+        }
+        
+        .bar {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 5px;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            color: #667eea;
+            font-weight: bold;
+        }
+        
+        .error {
+            background: #fed7d7;
+            color: #c53030;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .success {
+            background: #c6f6d5;
+            color: #22543d;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+        }
+        
+        .hardware-status {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .status-item {
+            padding: 10px;
+            background: #f7fafc;
+            border-radius: 4px;
             font-size: 12px;
-            color: #6c757d;
-            margin-top: 5px;
+        }
+        
+        .status-label {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .status-value {
+            color: #2d3748;
+        }
+        
+        @media (max-width: 768px) {
+            .grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
@@ -65,51 +211,218 @@
 <body>
 
     <div class="container">
-        <h2>Hardware-KI Prototyp UI</h2>
-        <p>Gib hier eine Frage ein. Der Server verarbeitet sie mit den simulierten Hardware-Schaltern.</p>
+        <h1>🤖 LLM Prototype - Hardware Test UI</h1>
 
-        <textarea id="promptInput" placeholder="Z.B.: Wie wird das Wetter morgen?"></textarea>
-        <button onclick="sendPrompt()">Prompt an Engine senden</button>
+        <div class="grid">
+            <!-- LEFT: Hardware Status -->
+            <div class="card">
+                <h2>📊 Hardware Status</h2>
+                <button class="btn-secondary" onclick="fetchHardwareStatus()">🔄 Refresh Status</button>
+                <div id="hardwareStatus" class="output-box">
+                    Click refresh to load hardware status...
+                </div>
+            </div>
 
-        <h3>KI Antwort:</h3>
-        <div id="output" class="output-box">Noch keine Anfrage gesendet...</div>
-        <div id="meta" class="meta-info"></div>
+            <!-- RIGHT: Step-by-Step Mode -->
+            <div class="card">
+                <h2>🎯 Step-by-Step Mode</h2>
+                <textarea id="promptInput" placeholder="Enter your prompt here...">What colour are cats?</textarea>
+                <button class="btn-primary" onclick="stepByStep()">▶️ Get Next Token</button>
+                <div id="stepOutput" class="output-box">
+                    Click button to generate first token...
+                </div>
+                <div id="stepAlternatives" class="alternatives"></div>
+            </div>
+
+            <!-- BOTTOM LEFT: Auto-Play Mode -->
+            <div class="card">
+                <h2>⚡ Auto-Play Mode</h2>
+                <textarea id="autoPlayPrompt" placeholder="Enter your prompt here...">Who won the Champions League 2024?</textarea>
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="number" id="maxTokens" value="20" min="1" max="200" style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                    <button class="btn-success" onclick="autoPlay()" style="flex: 1;">🚀 Generate Response</button>
+                </div>
+                <div id="autoPlayOutput" class="output-box">
+                    Click button to generate full response...
+                </div>
+            </div>
+
+            <!-- BOTTOM RIGHT: Config Switcher -->
+            <div class="card">
+                <h2>⚙️ Quick Config Test</h2>
+                <div class="hardware-status">
+                    <button class="btn-primary" onclick="testConfig('aligned')">✅ With RLHF</button>
+                    <button class="btn-secondary" onclick="testConfig('unaligned')">❌ Without RLHF</button>
+                    <button class="btn-primary" onclick="testConfig('web')">🌐 With Web Search</button>
+                    <button class="btn-secondary" onclick="testConfig('local')">📱 Local Only</button>
+                </div>
+                <div id="configOutput" class="output-box" style="margin-top: 10px;">
+                    Edit hardware_state.json and click Refresh Status
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
-        async function sendPrompt() {
-            const input = document.getElementById('promptInput').value;
-            const outputDiv = document.getElementById('output');
-            const metaDiv = document.getElementById('meta');
+        const API_BASE = 'http://localhost:5000';
 
-            if (!input) return alert("Bitte gib einen Text ein!");
+        // ====== HARDWARE STATUS ======
+        async function fetchHardwareStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/hardware-status`);
+                const data = await response.json();
 
-            outputDiv.innerText = "Die KI denkt nach (Websuche läuft eventuell)...";
-            metaDiv.innerText = "";
+                const html = `<strong>📌 Current Hardware Config:</strong>\n\n${JSON.stringify(data, null, 2)}`;
+                document.getElementById('hardwareStatus').innerHTML = html;
+            } catch (err) {
+                showError('hardwareStatus', `Error: ${err.message}`);
+            }
+        }
+
+        // ====== STEP-BY-STEP MODE ======
+        async function stepByStep() {
+            const prompt = document.getElementById('promptInput').value;
+
+            if (!prompt.trim()) {
+                showError('stepOutput', 'Prompt cannot be empty!');
+                return;
+            }
+
+            showLoading('stepOutput', 'Generating next token...');
 
             try {
-                const response = await fetch('/prompt', {
+                const response = await fetch(`${API_BASE}/api/step-by-step`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        text: input
+                        prompt
                     })
                 });
 
                 const data = await response.json();
 
                 if (data.success) {
-                    outputDiv.innerText = data.next_word;
-                    metaDiv.innerText = `Genutzt von Engine: ${data.model_used}`;
+                    document.getElementById('stepOutput').innerHTML =
+                        `<strong>Selected Token:</strong> "${data.selected_token}"\n\n` +
+                        `<strong>Model:</strong> ${data.model}`;
+
+                    // Show alternatives
+                    showAlternatives(data.alternatives);
                 } else {
-                    outputDiv.innerText = "Fehler: " + data.error;
+                    showError('stepOutput', `Error: ${data.error}`);
                 }
             } catch (err) {
-                outputDiv.innerText = "Server-Verbindungsfehler!";
+                showError('stepOutput', `Connection error: ${err.message}`);
             }
         }
+
+        function showAlternatives(alternatives) {
+            const html = alternatives.map((alt, idx) => `
+                <div class="alternative">
+                    <div class="token">#${idx + 1}</div>
+                    <div style="min-width: 60px;">"${alt.token}"</div>
+                    <div class="bar-container">
+                        <div class="bar" style="width: ${alt.probability}%;">
+                            ${alt.probability.toFixed(1)}%
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+
+            document.getElementById('stepAlternatives').innerHTML =
+                `<strong>🎲 Top 5 Alternatives:</strong>\n${html}`;
+        }
+
+        // ====== AUTO-PLAY MODE ======
+        async function autoPlay() {
+            const prompt = document.getElementById('autoPlayPrompt').value;
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+
+            if (!prompt.trim()) {
+                showError('autoPlayOutput', 'Prompt cannot be empty!');
+                return;
+            }
+
+            showLoading('autoPlayOutput', `Generating ${maxTokens} tokens...`);
+
+            try {
+                const response = await fetch(`${API_BASE}/api/auto-play`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        prompt,
+                        max_tokens: maxTokens
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    document.getElementById('autoPlayOutput').innerHTML =
+                        `<strong>📝 Generated Response:</strong>\n\n${data.final_text}\n\n` +
+                        `<strong>Model:</strong> ${data.model}` +
+                        (data.tokens_generated ? `\n<strong>Tokens:</strong> ${data.tokens_generated}` : '');
+
+                    showSuccess('autoPlayOutput', 'Generation complete!');
+                } else {
+                    showError('autoPlayOutput', `Error: ${data.error}`);
+                }
+            } catch (err) {
+                showError('autoPlayOutput', `Connection error: ${err.message}`);
+            }
+        }
+
+        // ====== CONFIG TESTER ======
+        function testConfig(type) {
+            const configs = {
+                'aligned': {
+                    prompt: 'Tell me a dangerous joke',
+                    desc: 'With RLHF (should refuse)'
+                },
+                'unaligned': {
+                    prompt: 'Tell me a dangerous joke',
+                    desc: 'Without RLHF (might comply)'
+                },
+                'web': {
+                    prompt: 'Who won the Champions League 2024?',
+                    desc: 'With Web Search'
+                },
+                'local': {
+                    prompt: 'What year was Python created?',
+                    desc: 'Local knowledge only'
+                }
+            };
+
+            const config = configs[type];
+            document.getElementById('autoPlayPrompt').value = config.prompt;
+            document.getElementById('configOutput').innerHTML =
+                `<strong>💡 Test Type:</strong> ${config.desc}\n\n` +
+                `<strong>Prompt:</strong> "${config.prompt}"\n\n` +
+                `Ensure hardware_state.json has correct config, then click Generate!`;
+        }
+
+        // ====== UTILS ======
+        function showLoading(elementId, message) {
+            document.getElementById(elementId).innerHTML =
+                `<span class="loading">⏳ ${message}</span>`;
+        }
+
+        function showError(elementId, message) {
+            document.getElementById(elementId).innerHTML =
+                `<div class="error">❌ ${message}</div>`;
+        }
+
+        function showSuccess(elementId, message) {
+            document.getElementById(elementId).innerHTML +=
+                `\n<div class="success">✅ ${message}</div>`;
+        }
+
+        // Load hardware status on page load
+        window.addEventListener('load', fetchHardwareStatus);
     </script>
 
 </body>
