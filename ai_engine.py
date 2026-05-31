@@ -176,56 +176,58 @@ def run_ai_step_by_step(user_prompt, config, user_selected_tokens=None):
     
     return result
 
-def run_ai_auto_play(user_prompt, config, max_tokens=20):
-    """AUTO-PLAY MODE"""
+def run_ai_auto_play(user_prompt, config, max_tokens=100):
+    """AUTO-PLAY MODE - schnell, Text auf einmal generieren"""
     
-    model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
-    system_prompt = get_system_prompt(config['prompt_style'])
-    temperature = config['b2_temp']
-    
-    final_prompt = user_prompt
-    if config['b1_internet']:
-        context = get_live_context(user_prompt)
-        if context:
-            final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
-    
-    messages = [{"role": "user", "content": final_prompt}]
-    running_text = ""
-    token_count = 0
-    
-    # ← WICHTIG: Bei Base Model mehr Tokens pro API Call!
-    num_predict_per_call = 10 if not config['b3_alignment'] else 1
-    
-    for i in range(max_tokens):
-        active_messages = list(messages)
-        if running_text:
-            active_messages.append({"role": "assistant", "content": running_text})
+    try:
+        model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
+        system_prompt = get_system_prompt(config['prompt_style'])
+        temperature = config['b2_temp']
         
-        result = get_token_with_logprobs(
-            messages=active_messages,
-            model_name=model_name,
-            temperature=temperature,
-            system_prompt=system_prompt,
-            num_predict=num_predict_per_call  # ← ÜBERGEBEN!
+        # Baue den finalen Prompt
+        final_prompt = user_prompt
+        if config['b1_internet']:
+            context = get_live_context(user_prompt)
+            if context:
+                final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+        
+        print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, MaxTokens: {max_tokens}")
+        
+        # ← SCHNELL: Generiere den ganzen Text auf einmal!
+        response = ollama.generate(
+            model=model_name,
+            prompt=final_prompt,
+            options={
+                'temperature': float(temperature),
+                'num_predict': max_tokens,
+                'top_p': 0.9,
+            },
+            system=system_prompt,
+            stream=False  # ← Wichtig: nicht streamen
         )
         
-        if not result['success']:
-            print(f"[AutoPlay] Stopped: {result['error']}")
-            break
+        generated_text = response.get('response', '').strip()
         
-        token = result['selected_token']
-        running_text += token
-        token_count += len(token.split())  # ← Grobe Token-Zählung
+        # Entferne die Frage aus der Antwort (falls sie mitgegeben wurde)
+        if generated_text.startswith(user_prompt):
+            generated_text = generated_text[len(user_prompt):].strip()
         
-        print(f"[AutoPlay] Generated: '{token}' (total ~{token_count} tokens)")
+        tokens_generated = response.get('eval_count', 0)
         
-        if token.strip() in [".", "!", "?"]:
-            print(f"[AutoPlay] Stopped at sentence end")
-            break
-    
-    print(f"[AutoPlay] Total: ~{token_count} tokens")
-    
-    return {
-        "success": True,
-        "final_text": user_prompt + " " + running_text
-    }
+        print(f"[AutoPlay] Generated {tokens_generated} tokens")
+        
+        return {
+            "success": True,
+            "final_text": generated_text,  # ← NUR die Antwort, nicht die Frage!
+            "model_used": model_name,
+            "tokens_generated": tokens_generated
+        }
+        
+    except Exception as e:
+        print(f"[ERROR] auto-play: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return {
+            "success": False,
+            "error": str(e)
+        }

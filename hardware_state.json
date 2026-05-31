@@ -19,7 +19,7 @@
         },
         "rlhf_dice": {
             "present": true,
-            "alignment_enabled": true,
+            "alignment_enabled": false,
             "rfid_uid": "04H8I9J0"
         }
     },

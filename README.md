@@ -11,7 +11,9 @@ ollama pull llama3.2
 
 
 *** run code ***
-py app.py (for GUI)
+1. py app.py 
+2. cd llm-exhibition
+3. npm start
 
 or
 
