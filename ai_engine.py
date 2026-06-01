@@ -6,6 +6,33 @@ import os
 from ollama import Client
 from dotenv import load_dotenv
 from system_prompts import get_system_prompt
+import random
+import string
+
+def introduce_errors(text):
+    """Wenn keine Trainingsdaten: reines Chaos generieren"""
+    if not text or len(text) < 3:
+        return text
+    
+    # Möglichkeit 1: Nur Buchstabensalat
+    import random
+    import string
+    
+    chaos = []
+    for _ in range(random.randint(5, 10)):
+        word_length = random.randint(3, 8)
+        random_word = ''.join(random.choices(string.ascii_lowercase, k=word_length))
+        chaos.append(random_word)
+    
+    # Mische mit Sonderzeichen
+    chaos_text = ' '.join(chaos)
+    
+    for _ in range(3):
+        pos = random.randint(0, len(chaos_text)-1)
+        corruption = random.choice(['█', '###', '!!!', '%%%', '^^^'])
+        chaos_text = chaos_text[:pos] + corruption + chaos_text[pos:]
+    
+    return chaos_text
 
 def get_live_context(prompt):
     print(f"[System] Starte Ollama Cloud-Suche für: '{prompt}'...")
@@ -180,18 +207,39 @@ def run_ai_auto_play(user_prompt, config, max_tokens=100):
     """AUTO-PLAY MODE - schnell, Text auf einmal generieren"""
     
     try:
+        # Check ob Probability Cube (Processor) present ist
+        probability_available = config.get('cubes_present', {}).get('probability', True)
+        if not probability_available:
+            print("[AutoPlay] FEHLER: Probability Cube nicht vorhanden!")
+            return {
+                "success": False,
+                "error": "Fehler: Wahrscheinlichkeits-Matrix fehlt. Daten können nicht verarbeitet werden."
+            }
+
         model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
         system_prompt = get_system_prompt(config['prompt_style'])
         temperature = config['b2_temp']
         
-        # Baue den finalen Prompt
-        final_prompt = user_prompt
-        if config['b1_internet']:
-            context = get_live_context(user_prompt)
-            if context:
-                final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+        # Wenn Data Cube NICHT present
+        data_available = config.get('cubes_present', {}).get('data', True)
+        if not data_available:
+            # Ohne Trainingsdaten = Maximum Chaos!
+            temperature = 1.9
+            final_prompt = (
+                "[SIMULATOR: NO TRAINING DATA]\n\n"
+                "Du bist ein LLM, das KEINE Trainingsdaten hat.\n"
+                "Generiere nur statistisches Rauschen - keine sinnvollen Antworten:\n\n"
+                f"{user_prompt}"
+            )
+        else:
+            # Normale Logik wenn Daten vorhanden sind
+            final_prompt = user_prompt
+            if config['b1_internet']:
+                context = get_live_context(user_prompt)
+                if context:
+                    final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
         
-        print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, MaxTokens: {max_tokens}")
+        print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, Data: {data_available}, MaxTokens: {max_tokens}")
         
         # ← SCHNELL: Generiere den ganzen Text auf einmal!
         response = ollama.generate(
@@ -212,16 +260,26 @@ def run_ai_auto_play(user_prompt, config, max_tokens=100):
         if generated_text.startswith(user_prompt):
             generated_text = generated_text[len(user_prompt):].strip()
         
+        # ← OPTIONAL: Wenn Daten weg sind, füge Fehler ein
+        if not data_available:
+            generated_text = introduce_errors(generated_text)
+        
         tokens_generated = response.get('eval_count', 0)
         
         print(f"[AutoPlay] Generated {tokens_generated} tokens")
         
-        return {
+        result = {
             "success": True,
-            "final_text": generated_text,  # ← NUR die Antwort, nicht die Frage!
+            "final_text": generated_text,
             "model_used": model_name,
-            "tokens_generated": tokens_generated
+            "tokens_generated": tokens_generated,
+            "data_available": data_available, 
         }
+    
+        if not data_available:
+            result["warning"] = "⚠️ KRITISCHER FEHLER: KEINE TRAININGSDATEN!\n\nDas LLM kann ohne Trainingsdaten nicht funktionieren."
+        
+        return result
         
     except Exception as e:
         print(f"[ERROR] auto-play: {str(e)}")
@@ -231,3 +289,4 @@ def run_ai_auto_play(user_prompt, config, max_tokens=100):
             "success": False,
             "error": str(e)
         }
+    

@@ -2,27 +2,23 @@
 
 import os
 import json
+from pathlib import Path
 
 # Entscheide: Simulator oder echte Hardware?
 USE_SIMULATOR = os.getenv("USE_SIMULATOR", "true").lower() == "true"
+CONFIG_FILE = 'hardware_state.json'
 
 def get_hardware_config():
     """
-    Gibt standardisierte Config zurück - entweder von Arduino ODER Simulator.
+    Gibt standardisierte Config zurück - entweder von JSON ODER Arduino.
     
     Returns:
     {
-        "cubes_present": {
-            "probability": bool,
-            "prompting": bool,
-            "data": bool,
-            "rlhf": bool
-        },
-        "b1_internet": bool,      # Data Dice vorhanden?
-        "b2_temp": float,         # Potentiometer Wert (0.0-2.0)
-        "b2_mode": "live|step",   # Probability Dice Modus
-        "b3_alignment": bool,     # RLHF Dice vorhanden?
-        "prompt_style": str       # Welche Seite des Prompting Dice oben?
+        "cubes_present": { "probability": bool, "prompting": bool, "data": bool, "rlhf": bool },
+        "b1_internet": bool,
+        "b2_temp": float,
+        "b3_alignment": bool,
+        "prompt_style": str
     }
     """
     
@@ -32,28 +28,20 @@ def get_hardware_config():
         return _get_arduino_config()
 
 def _get_simulator_config():
-    """Liest aus hardware_state.json"""
+    """Liest direkt aus hardware_state.json im neuen Format"""
     try:
-        with open('hardware_state.json', 'r') as f:
-            simulator_data = json.load(f)
-        
-        cubes = simulator_data.get('cubes', {})
-        
-        return {
-            "cubes_present": {
-                "probability": cubes.get('probability_dice', {}).get('present', False),
-                "prompting": cubes.get('prompting_dice', {}).get('present', False),
-                "data": cubes.get('data_dice', {}).get('present', False),
-                "rlhf": cubes.get('rlhf_dice', {}).get('present', False)
-            },
-            "b1_internet": cubes.get('data_dice', {}).get('internet_enabled', False),
-            "b2_temp": cubes.get('probability_dice', {}).get('temperature', 0.7),
-            "b2_mode": cubes.get('probability_dice', {}).get('mode', 'live'),
-            "b3_alignment": cubes.get('rlhf_dice', {}).get('alignment_enabled', True),
-            "prompt_style": cubes.get('prompting_dice', {}).get('side', 'standard')
-        }
+        if Path(CONFIG_FILE).exists():
+            with open(CONFIG_FILE, 'r') as f:
+                config = json.load(f)
+            
+            print(f"[Config] Loaded from {CONFIG_FILE}: {json.dumps(config, indent=2)}")
+            return config
+        else:
+            print(f"[Warning] {CONFIG_FILE} not found. Using defaults.")
+            return _default_config()
+    
     except Exception as e:
-        print(f"[Error] Simulator config failed: {e}. Using defaults.")
+        print(f"[Error] Could not read {CONFIG_FILE}: {e}. Using defaults.")
         return _default_config()
 
 def _get_arduino_config():
@@ -66,20 +54,29 @@ def _get_arduino_config():
         return _default_config()
 
 def _default_config():
-    """Fallback: Sicherheitsstandard (aligned, no internet)"""
+    """Default Config wenn keine Datei existiert"""
     return {
         "cubes_present": {
-            "probability": False,
-            "prompting": False,
-            "data": False,
-            "rlhf": True  # Safety first!
+            "probability": True,
+            "prompting": True,
+            "data": True,
+            "rlhf": True,
         },
-        "b1_internet": False,
+        "b1_internet": True,
         "b2_temp": 0.7,
         "b2_mode": "live",
         "b3_alignment": True,
-        "prompt_style": "standard"
+        "prompt_style": "standard",
     }
+
+def save_hardware_config(config):
+    """Speichert Config in JSON"""
+    try:
+        with open(CONFIG_FILE, 'w') as f:
+            json.dump(config, f, indent=2)
+        print(f"[Config] Saved to {CONFIG_FILE}")
+    except Exception as e:
+        print(f"[Error] Could not save config: {e}")
 
 if __name__ == "__main__":
     print(get_hardware_config())

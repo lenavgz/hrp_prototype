@@ -1,38 +1,512 @@
 .App {
-  text-align: center;
+    text-align: center;
 }
 
 .App-logo {
-  height: 40vmin;
-  pointer-events: none;
+    height: 40vmin;
+    pointer-events: none;
+}
+
+
+/* App.css */
+
+* {
+    box-sizing: border-box;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #0f0e1e 0%, #1a1832 100%);
+    color: #fff;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+
+/* ============= CONTROL PANEL ============= */
+
+.controlPanel {
+    grid-column: 1 / -1;
+    border-bottom: 1px solid rgba(94, 235, 172, 0.2);
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+}
+
+.controlToggleButton {
+    padding: 8px 16px;
+    background: rgba(94, 235, 172, 0.1);
+    border: 1px solid rgba(94, 235, 172, 0.3);
+    border-radius: 6px;
+    color: #5eebac;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.controlToggleButton:hover {
+    background: rgba(94, 235, 172, 0.2);
+    border-color: rgba(94, 235, 172, 0.5);
+}
+
+.controlToggleIcon {
+    margin-right: 8px;
+    font-size: 16px;
+}
+
+.controlContent {
+    margin-top: 16px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid rgba(94, 235, 172, 0.1);
+    border-radius: 8px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 24px;
+}
+
+.controlSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.controlSectionTitle {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #5eebac;
+    margin: 0 0 8px 0;
+}
+
+.cubesGrid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+}
+
+.cubeControl {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: center;
+}
+
+.cubeButton {
+    padding: 12px 16px;
+    border: 2px solid;
+    border-radius: 6px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    width: 100%;
+    color: #fff;
+}
+
+.cubeButton:hover {
+    transform: translateY(-2px);
+}
+
+.cubeLabel {
+    font-size: 11px;
+    color: #888;
+    text-align: center;
+}
+
+.sliderContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.slider {
+    flex: 1;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(94, 235, 172, 0.2);
+    outline: none;
+    cursor: pointer;
+    -webkit-appearance: none;
+    appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #5eebac;
+    cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: #5eebac;
+    cursor: pointer;
+    border: none;
+}
+
+.sliderValue {
+    font-size: 13px;
+    font-weight: 600;
+    color: #5eebac;
+    min-width: 80px;
+    text-align: right;
+}
+
+.sliderLabel {
+    font-size: 11px;
+    color: #888;
+    display: block;
+    margin-top: 2px;
+}
+
+.promptStyleGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+}
+
+.promptStyleButton {
+    padding: 8px 12px;
+    border: 1px solid rgba(94, 235, 172, 0.3);
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    background: rgba(94, 235, 172, 0.05);
+    color: #5eebac;
+}
+
+.promptStyleButton:hover {
+    background: rgba(94, 235, 172, 0.15);
+}
+
+.promptStyleButton.active {
+    background: rgba(94, 235, 172, 0.3);
+    border-color: #5eebac;
+}
+
+.toggleControl {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 8px;
+}
+
+.checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #5eebac;
+}
+
+.stateDisplay {
+    margin-top: 16px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(94, 235, 172, 0.1);
+    border-radius: 4px;
+    grid-column: 1 / -1;
+}
+
+.stateTitle {
+    font-size: 12px;
+    font-weight: 600;
+    color: #888;
+    margin: 0 0 8px 0;
+}
+
+.statePre {
+    font-size: 10px;
+    color: #5eebac;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 8px;
+    border-radius: 4px;
+    overflow: auto;
+    max-height: 150px;
+    margin: 0;
+    font-family: 'Courier New', monospace;
+}
+
+
+/* ============= MAIN UI ============= */
+
+.leftPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.rightPanel {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.header {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    color: #5eebac;
+    margin-bottom: 8px;
+}
+
+.input {
+    flex: 1;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    color: #fff;
+    font-size: 14px;
+    font-family: inherit;
+    min-height: 200px;
+    resize: none;
+    outline: none;
+    transition: all 0.2s ease;
+}
+
+.input:focus {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(94, 235, 172, 0.3);
+}
+
+.sendButton {
+    padding: 12px 24px;
+    background: linear-gradient(135deg, #5eebac 0%, #4dd9a0 100%);
+    color: #0f0e1e;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s ease;
+    letter-spacing: 0.5px;
+}
+
+.sendButton:hover {
+    transform: scale(1.02);
+}
+
+.sendButton:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.toggleContainer {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+}
+
+.toggleLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 500;
+    color: #aaa;
+}
+
+.toggleText {
+    letter-spacing: 1px;
+}
+
+.machineLabel {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.outputBox {
+    flex: 1;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    min-height: 200px;
+    font-size: 15px;
+    line-height: 1.6;
+    color: #fff;
+    word-wrap: break-word;
+    overflow: auto;
+}
+
+.outputText {
+    display: inline;
+}
+
+.cursor {
+    margin-left: 2px;
+    color: #5eebac;
+}
+
+
+/* ============= ALTERNATIVES / STEP-BY-STEP ============= */
+
+.alternativesContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.alternativesTitle {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #888;
+    margin: 0 0 12px 0;
+}
+
+.barWrapper {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.bar {
+    height: 4px;
+    border-radius: 2px;
+    background: rgba(94, 235, 172, 0.3);
+    min-width: 40px;
+    transition: width 0.2s ease;
+}
+
+.tokenButton {
+    flex: 1;
+    padding: 8px 12px;
+    background: rgba(94, 235, 172, 0.1);
+    border: 1px solid rgba(94, 235, 172, 0.2);
+    border-radius: 4px;
+    color: #5eebac;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.tokenButton:hover {
+    background: rgba(94, 235, 172, 0.2);
+    border-color: rgba(94, 235, 172, 0.4);
+}
+
+.tokenText {
+    flex: 1;
+    text-align: left;
+}
+
+.probability {
+    font-size: 12px;
+    color: #888;
+    margin-left: 8px;
+}
+
+
+/* ============= ERROR & SUCCESS MESSAGES ============= */
+
+.errorBox {
+    margin-top: 25px;
+    padding: 15px;
+    background: #ffebee;
+    border: 3px solid #d32f2f;
+    border-radius: 4px;
+    color: #c62828;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.errorIcon {
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.successBox {
+    margin-top: 25px;
+    padding: 15px;
+    background: #e8f5e9;
+    border: 3px solid #388e3c;
+    border-radius: 4px;
+    color: #1b5e20;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.successIcon {
+    font-size: 24px;
+    flex-shrink: 0;
 }
 
 @media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
 }
 
 .App-header {
-  background-color: #282c34;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+    background-color: #282c34;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(10px + 2vmin);
+    color: white;
 }
 
 .App-link {
-  color: #61dafb;
+    color: #61dafb;
 }
 
 @keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.warningBox {
+    margin-top: 25px;
+    padding: 15px;
+    background: #fff3cd;
+    border: 3px solid #ff9800;
+    border-radius: 4px;
+    color: #856404;
+    font-weight: bold;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    white-space: pre-wrap;
+}
+
+.warningIcon {
+    font-size: 24px;
+    flex-shrink: 0;
 }

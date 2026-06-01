@@ -1,10 +1,14 @@
 # app.py
 
 from flask import Flask, render_template, request, jsonify
-from hardware_config import get_hardware_config
+from hardware_config import get_hardware_config, save_hardware_config
 from ai_engine import run_ai_step_by_step, run_ai_auto_play
 import json
 from flask_cors import CORS 
+import json
+from pathlib import Path
+
+CONFIG_FILE = 'hardware_state.json'
 
 app = Flask(__name__, template_folder='.')
 CORS(app) 
@@ -30,6 +34,12 @@ def step_by_step():
         "user_selected_tokens": ["C", "a", "t"]  (optional)
     }
     """
+
+    data = request.json
+    config = data.get('config', {})
+    
+    # ← SPEICHERE DIE CONFIG
+    save_hardware_config(config)
     try:
         # 1. HARDWARE CONFIG LESEN
         config = get_hardware_config()
@@ -63,6 +73,13 @@ def auto_play():
         "max_tokens": 10  (optional, default 20)
     }
     """
+
+    data = request.json
+    config = data.get('config', {})
+    
+    # ← SPEICHERE DIE CONFIG
+    save_hardware_config(config)
+
     try:
         # 1. HARDWARE CONFIG LESEN
         config = get_hardware_config()

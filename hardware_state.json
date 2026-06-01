@@ -1,30 +1,13 @@
 {
-    "timestamp": "2025-05-27T14:32:15",
-    "cubes": {
-        "probability_dice": {
-            "present": true,
-            "temperature": 1.0,
-            "mode": "live",
-            "potentiometer_raw": 512
-        },
-        "prompting_dice": {
-            "present": true,
-            "side": "standard",
-            "rfid_uid": "04A2B3C4"
-        },
-        "data_dice": {
-            "present": true,
-            "internet_enabled": false,
-            "rfid_uid": "04E5F6G7"
-        },
-        "rlhf_dice": {
-            "present": true,
-            "alignment_enabled": false,
-            "rfid_uid": "04H8I9J0"
-        }
-    },
-    "debug": {
-        "arduino_port": "COM3",
-        "last_update": "arduino"
-    }
+  "cubes_present": {
+    "probability": true,
+    "prompting": true,
+    "data": true,
+    "rlhf": true
+  },
+  "b1_internet": false,
+  "b2_temp": 0.7,
+  "b2_mode": "live",
+  "b3_alignment": true,
+  "prompt_style": "standard"
 }
