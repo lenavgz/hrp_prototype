@@ -344,8 +344,8 @@ export default function App() {
                 div className = "errorBox" >
                 <
                 span className = "errorIcon" > ⚠️ < /span> <
-                span > { error } < /span> < /
-                div >
+                span > { error } < /span> <
+                /div>
             )
         }
 
@@ -354,80 +354,85 @@ export default function App() {
                 div className = "warningBox" >
                 <
                 span className = "warningIcon" > ⚠️ < /span> <
-                span > { warning } < /span> < /
-                div >
+                span > { warning } < /span> <
+                /div>
             )
         }
 
         {
             !error && ( <
-                >
-                <
-                div className = "outputBox"
-                ref = { outputRef } >
-                <
-                span className = "outputText" > { output } < /span> {
-                isGenerating && < span className = "cursor" > ▌ < /span>} < /
-                div >
+                    >
+                    <
+                    div className = "outputBox"
+                    ref = { outputRef } >
+                    <
+                    span className = "outputText" > { output } < /span> {
+                        isGenerating && < span className = "cursor" > ▌ < /span>} <
+                            /div>
 
-                {
-                    uiMode === 'wordbyword' && alternatives.length > 0 && ( <
-                        div className = "alternativesBox" >
-                        <
-                        div className = "alternativesLabel" > Next Token Probabilities: < /div> <
-                        div className = "tokenButtons" > {
-                            alternatives.map((alt, idx) => {
-                                // 1. Suche flexibel nach dem richtigen Feldnamen vom Backend
-                                const rawValue = alt.logprob !== undefined ? alt.logprob :
-                                    alt.probability !== undefined ? alt.probability :
-                                    alt.prob !== undefined ? alt.prob :
-                                    alt.percentage;
+                        {
+                            uiMode === 'wordbyword' && alternatives.length > 0 && ( <
+                                div className = "alternativesBox" >
+                                <
+                                div className = "alternativesLabel" > Next Token Probabilities: < /div> <
+                                div className = "tokenButtons"
+                                style = {
+                                    { display: 'flex', flexDirection: 'column' } } > {
+                                    alternatives.map((alt, idx) => {
+                                        // 1. Suche flexibel nach dem richtigen Feldnamen vom Backend
+                                        const rawValue = alt.logprob !== undefined ? alt.logprob :
+                                            alt.probability !== undefined ? alt.probability :
+                                            alt.prob !== undefined ? alt.prob :
+                                            alt.percentage;
 
-                                const numericValue = parseFloat(rawValue);
-                                let percentage = 0;
+                                        const numericValue = parseFloat(rawValue);
+                                        let percentage = 0;
 
-                                if (!isNaN(numericValue)) {
-                                    // Falls es ein negativer Log-Wert ist (z.B. -0.15) -> umrechnen mit e^x * 100
-                                    if (numericValue <= 0 && alt.logprob !== undefined) {
-                                        percentage = Math.exp(numericValue) * 100;
-                                    }
-                                    // Falls es eine Dezimalwahrscheinlichkeit ist (z.B. 0.85) -> * 100
-                                    else if (numericValue > 0 && numericValue <= 1) {
-                                        percentage = numericValue * 100;
-                                    }
-                                    // Falls es bereits ein fertiger Prozentwert ist (z.B. 85.5)
-                                    else {
-                                        percentage = numericValue;
-                                    }
-                                }
+                                        if (!isNaN(numericValue)) {
+                                            if (numericValue <= 0 && alt.logprob !== undefined) {
+                                                percentage = Math.exp(numericValue) * 100;
+                                            } else if (numericValue > 0 && numericValue <= 1) {
+                                                percentage = numericValue * 100;
+                                            } else {
+                                                percentage = numericValue;
+                                            }
+                                        }
 
-                                return ( <
-                                    button key = { idx }
-                                    className = "tokenButton"
-                                    onClick = {
-                                        () => handleTokenSelect(alt.token)
-                                    }
-                                    disabled = { loading } >
-                                    <
-                                    span > { alt.token } < /span> <
-                                    span style = {
-                                        { opacity: 0.6, fontSize: '11px', marginTop: '4px' }
-                                    } > { isNaN(numericValue) ? '0.0' : percentage.toFixed(1) } %
-                                    <
-                                    /span> < /
-                                    button >
-                                );
-                            })
+                                        const displayPercent = isNaN(numericValue) ? 0 : percentage;
+
+                                        return ( <
+                                            button key = { idx }
+                                            className = "tokenButton"
+                                            onClick = {
+                                                () => handleTokenSelect(alt.token) }
+                                            disabled = { loading }
+                                            style = {
+                                                {
+                                                    /* Erzeugt den Balken-Effekt im Hintergrund */
+                                                    background: `linear-gradient(90deg, rgba(110, 199, 255, 0.35) ${displayPercent}%, rgba(255, 255, 255, 0.05) ${displayPercent}%)`,
+                                                }
+                                            } >
+                                            <
+                                            span style = {
+                                                { position: 'relative', zIndex: 2 } } > { alt.token } < /span> <
+                                            span className = "tokenProb"
+                                            style = {
+                                                { position: 'relative', zIndex: 2 } } > { displayPercent.toFixed(1) } %
+                                            <
+                                            /span> <
+                                            /button>
+                                        );
+                                    })
+                                } <
+                                /div> < /
+                                div >
+                            )
                         } <
-                        /div> < /
-                        div >
+                        />
                     )
                 } <
-                />
-            )
-        } <
-        /div> < /
-        div > <
-        /div>
-    );
-}
+                /div> < /
+            div > <
+                /div>
+        );
+    }

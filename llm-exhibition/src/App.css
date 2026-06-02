@@ -398,23 +398,35 @@ body {
 }
 
 .tokenButton {
-    padding: 0.5rem 0.75rem;
+    padding: 0.75rem 1.2rem;
     border: 2px solid #6ec7ff;
-    border-radius: 6px;
-    background-color: rgba(110, 199, 255, 0.1);
+    border-radius: 8px;
     color: var(--color-text-primary, #1a1a1a);
-    font-size: 13px;
+    font-size: 14px;
     font-weight: 600;
     cursor: pointer;
-    transition: all 0.2s;
+    transition: transform 0.2s, box-shadow 0.2s;
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    /* Text links, Prozentwert rechts */
+    width: 100%;
+    /* Macht die Buttons zu Zeilen wie im Bild */
+    margin-bottom: 0.5rem;
+    position: relative;
+    overflow: hidden;
 }
 
 .tokenButton:hover {
-    background-color: #6ec7ff;
-    color: #fff;
+    transform: translateX(4px);
+    /* Schiebt den Button beim Hovern leicht nach rechts */
+    box-shadow: 0 2px 8px rgba(110, 199, 255, 0.2);
+}
+
+.tokenProb {
+    font-size: 12px;
+    opacity: 0.8;
+    font-weight: 700;
 }
 
 
