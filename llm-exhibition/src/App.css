@@ -21,6 +21,41 @@ body {
     margin: 0 auto;
 }
 
+:root {
+  --color-background-primary:   #ffffff;
+  --color-background-secondary: #f9f9f9;
+  --color-background-tertiary:  #f5f5f5;
+  --color-text-primary:         #1a1a1a;
+  --color-text-secondary:       #666666;
+  --color-text-tertiary:        #999999;
+  --color-border-primary:       #cccccc;
+  --color-border-secondary:     #dddddd;
+  --color-border-tertiary:      #dddddd;
+  
+  /* UI Colors - Consistent across app */
+  --color-prompting:   #6ec7ff;
+  --color-data:        #98a2eb;
+  --color-internet:     #280788;
+  --color-rlhf:        #ef7ca6;
+  --color-probability: #7bebb9;
+  --color-alignment:   #ef7ca6;
+  --color-tone:        #6ec7ff;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-background-primary:   #1a1a1a;
+    --color-background-secondary: #242424;
+    --color-background-tertiary:  #2e2e2e;
+    --color-text-primary:         #f0f0f0;
+    --color-text-secondary:       #aaaaaa;
+    --color-text-tertiary:        #666666;
+    --color-border-primary:       #444444;
+    --color-border-secondary:     #383838;
+    --color-border-tertiary:      #383838;
+  }
+}
+
 
 /* =====================================================
    HARDWARE GRID - ALL 4 CUBES IN ONE ROW (DESKTOP)
@@ -60,7 +95,7 @@ body {
 /* PROMPTING CUBE - Refactored 3x2 grid fitting inside the cube cleanly */
 
 .promptingCube {
-    border-color: #6ec7ff;
+    border-color: var(--color-prompting);
     background: linear-gradient(135deg, rgba(110, 199, 255, 0.05) 0%, transparent 100%);
 }
 
@@ -75,14 +110,14 @@ body {
 }
 
 .promptSelectButton {
-    border: 2px solid #6ec7ff;
+    border: 2px solid var(--color-prompting);
     border-radius: 8px;
     font-size: 12px;
     font-weight: 600;
     cursor: pointer;
     transition: all 0.2s ease;
     background-color: rgba(110, 199, 255, 0.15);
-    color: var(--color-text-primary, #1a1a1a);
+    color: var(--color-text-primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -95,7 +130,7 @@ body {
 }
 
 .promptSelectButton.active {
-    background-color: #6ec7ff;
+    background-color: var(--color-prompting);
     color: #fff;
     box-shadow: 0 4px 12px rgba(110, 199, 255, 0.35);
 }
@@ -104,8 +139,8 @@ body {
 /* DATA CUBE - Main configuration */
 
 .dataCube {
-    border-color: #ffa500;
-    background: linear-gradient(135deg, rgba(255, 165, 0, 0.05) 0%, transparent 100%);
+    border-color: var(--color-data);
+    background: linear-gradient(135deg, rgba(152, 162, 235, 0.05) 0%, transparent 100%);
 }
 
 .mainCubeButton {
@@ -134,6 +169,42 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
+/* Data Cube Button */
+.mainCubeButton.data {
+    border-color: var(--color-data);
+    background-color: rgba(152, 162, 235, 0.15);
+    color: var(--color-text-primary);
+}
+
+.mainCubeButton.data.active {
+    background-color: var(--color-data);
+    color: #000;
+}
+
+/* RLHF Cube Button */
+.mainCubeButton.rlhf {
+    border-color: var(--color-rlhf);
+    background-color: rgba(239, 124, 166, 0.15);
+    color: var(--color-text-primary);
+}
+
+.mainCubeButton.rlhf.active {
+    background-color: var(--color-rlhf);
+    color: #fff;
+}
+
+/* Probability Cube Button */
+.mainCubeButton.probability {
+    border-color: var(--color-probability);
+    background-color: rgba(123, 235, 185, 0.15);
+    color: var(--color-text-primary);
+}
+
+.mainCubeButton.probability.active {
+    background-color: var(--color-probability);
+    color: #000;
+}
+
 .cubeLabelLarge {
     font-size: 16px;
     text-transform: uppercase;
@@ -154,8 +225,7 @@ body {
     right: 1.75rem;
     width: calc(50% - 1rem);
     aspect-ratio: 1.1;
-    /* slightly wider to fit labels perfectly */
-    border: 2px solid;
+    border: 2px solid var(--color-internet);
     border-radius: 6px;
     font-size: 11px;
     font-weight: 600;
@@ -167,10 +237,17 @@ body {
     justify-content: center;
     gap: 0.1rem;
     padding: 0.25rem;
+    background-color: rgba(40, 7, 136, 0.15);
+    color: var(--color-text-primary);
 }
 
 .internetSubButton:hover:not(:disabled) {
     transform: scale(1.05);
+}
+
+.internetSubButton.active {
+    background-color: rgba(40, 7, 136, 1);
+    color: #fff;
 }
 
 .internetSubButton.disabled {
@@ -192,16 +269,16 @@ body {
 /* RLHF CUBE */
 
 .rlhfCube {
-    border-color: #ff6b9d;
-    background: linear-gradient(135deg, rgba(255, 107, 157, 0.05) 0%, transparent 100%);
+    border-color: var(--color-rlhf);
+    background: linear-gradient(135deg, rgba(239, 124, 166, 0.05) 0%, transparent 100%);
 }
 
 
 /* PROBABILITY CUBE */
 
 .probabilityCube {
-    border-color: #5eebac;
-    background: linear-gradient(135deg, rgba(94, 235, 172, 0.05) 0%, transparent 100%);
+    border-color: var(--color-probability);
+    background: linear-gradient(135deg, rgba(123, 235, 185, 0.05) 0%, transparent 100%);
 }
 
 
@@ -251,7 +328,7 @@ body {
 
 .promptInput:focus {
     outline: none;
-    border-color: #6ec7ff;
+    border-color: var(--color-prompting);
     box-shadow: 0 0 0 3px rgba(110, 199, 255, 0.1);
 }
 
@@ -274,12 +351,12 @@ body {
     text-transform: uppercase;
     cursor: pointer;
     transition: all 0.2s;
-    background-color: var(--color-background-tertiary, #f5f5f5);
-    color: var(--color-text-secondary, #666);
+    background-color: var(--color-background-tertiary);
+    color: var(--color-text-secondary);
 }
 
 .modeButton.active {
-    background-color: #6ec7ff;
+    background-color: var(--color-prompting);
     color: #fff;
     box-shadow: 0 2px 8px rgba(110, 199, 255, 0.3);
 }
@@ -288,7 +365,7 @@ body {
     padding: 1rem;
     border: none;
     border-radius: 8px;
-    background-color: #6ec7ff;
+    background-color: var(--color-prompting);
     color: #fff;
     font-size: 15px;
     font-weight: 600;
@@ -304,8 +381,8 @@ body {
 }
 
 .sendButton:disabled {
-    background-color: var(--color-border-tertiary, #ddd);
-    color: var(--color-text-tertiary, #999);
+    background-color: var(--color-border-tertiary);
+    color: var(--color-text-tertiary);
     cursor: not-allowed;
     box-shadow: none;
 }
@@ -331,7 +408,7 @@ body {
 
 .cursor {
     animation: blink 1s infinite;
-    color: #6ec7ff;
+    color: var(--color-prompting);
     font-weight: bold;
 }
 
@@ -399,9 +476,9 @@ body {
 
 .tokenButton {
     padding: 0.75rem 1.2rem;
-    border: 2px solid #6ec7ff;
+    border: 2px solid var(--color-prompting);
     border-radius: 8px;
-    color: var(--color-text-primary, #1a1a1a);
+    color: var(--color-text-primary);
     font-size: 14px;
     font-weight: 600;
     cursor: pointer;
@@ -409,9 +486,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    /* Text links, Prozentwert rechts */
     width: 100%;
-    /* Macht die Buttons zu Zeilen wie im Bild */
     margin-bottom: 0.5rem;
     position: relative;
     overflow: hidden;
@@ -419,7 +494,6 @@ body {
 
 .tokenButton:hover {
     transform: translateX(4px);
-    /* Schiebt den Button beim Hovern leicht nach rechts */
     box-shadow: 0 2px 8px rgba(110, 199, 255, 0.2);
 }
 
@@ -429,6 +503,187 @@ body {
     font-weight: 700;
 }
 
+
+/* =====================================================
+   PRESET PROMPTS STYLING
+   ===================================================== */
+
+.presetPromptsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.categoryTabsContainer {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.categoryTab {
+    padding: 0.35rem 0.85rem;
+    border: 2px solid;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.categoryTab.all {
+    border-color: #888;
+    background-color: rgba(136, 136, 136, 0.1);
+    color: var(--color-text-secondary);
+}
+
+.categoryTab.all.active {
+    background-color: #555;
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(85, 85, 85, 0.44);
+}
+
+.categoryTab.alignment {
+    border-color: var(--color-alignment);
+    background-color: rgba(239, 124, 166, 0.12);
+    color: var(--color-text-secondary);
+}
+
+.categoryTab.alignment.active {
+    background-color: var(--color-alignment);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(239, 124, 166, 0.44);
+}
+
+.categoryTab.data {
+    border-color: var(--color-data);
+    background-color: rgba(152, 162, 235, 0.12);
+    color: var(--color-text-secondary);
+}
+
+.categoryTab.data.active {
+    background-color: var(--color-data);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(152, 162, 235, 0.44);
+}
+
+.categoryTab.probability {
+    border-color: var(--color-probability);
+    background-color: rgba(123, 235, 185, 0.12);
+    color: var(--color-text-secondary);
+}
+
+.categoryTab.probability.active {
+    background-color: var(--color-probability);
+    color: #1a1a1a;
+    box-shadow: 0 2px 8px rgba(123, 235, 185, 0.44);
+}
+
+.categoryTab.tone {
+    border-color: var(--color-tone);
+    background-color: rgba(110, 199, 255, 0.12);
+    color: var(--color-text-secondary);
+}
+
+.categoryTab.tone.active {
+    background-color: var(--color-tone);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(110, 199, 255, 0.44);
+}
+
+.presetsGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.5rem;
+}
+
+.presetChip {
+    padding: 0.6rem 0.75rem;
+    border: 2px solid;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.presetChip.alignment {
+    border-color: var(--color-alignment);
+    background-color: rgba(239, 124, 166, 0.12);
+    color: var(--color-text-primary);
+}
+
+.presetChip.alignment.selected {
+    background-color: var(--color-alignment);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(239, 124, 166, 0.44);
+    transform: translateY(-1px);
+}
+
+.presetChip.data {
+    border-color: var(--color-data);
+    background-color: rgba(152, 162, 235, 0.12);
+    color: var(--color-text-primary);
+}
+
+.presetChip.data.selected {
+    background-color: var(--color-data);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(152, 162, 235, 0.44);
+    transform: translateY(-1px);
+}
+
+.presetChip.probability {
+    border-color: var(--color-probability);
+    background-color: rgba(123, 235, 185, 0.12);
+    color: var(--color-text-primary);
+}
+
+.presetChip.probability.selected {
+    background-color: var(--color-probability);
+    color: #1a1a1a;
+    box-shadow: 0 4px 12px rgba(123, 235, 185, 0.44);
+    transform: translateY(-1px);
+}
+
+.presetChip.tone {
+    border-color: var(--color-tone);
+    background-color: rgba(110, 199, 255, 0.12);
+    color: var(--color-text-primary);
+}
+
+.presetChip.tone.selected {
+    background-color: var(--color-tone);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(110, 199, 255, 0.44);
+    transform: translateY(-1px);
+}
+
+.presetChipTitle {
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    font-size: 11px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.presetChipDesc {
+    font-size: 10px;
+    opacity: 0.6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.presetChip.selected .presetChipDesc {
+    opacity: 0.85;
+}
 
 /* =====================================================
    DARK MODE SYSTEM COMPATIBILITY
@@ -442,12 +697,12 @@ body {
         background: linear-gradient(135deg, rgba(110, 199, 255, 0.1) 0%, transparent 100%);
     }
     .dataCube {
-        background: linear-gradient(135deg, rgba(255, 165, 0, 0.1) 0%, transparent 100%);
+        background: linear-gradient(135deg, rgba(152, 162, 235, 0.1) 0%, transparent 100%);
     }
     .rlhfCube {
-        background: linear-gradient(135deg, rgba(255, 107, 157, 0.1) 0%, transparent 100%);
+        background: linear-gradient(135deg, rgba(239, 124, 166, 0.1) 0%, transparent 100%);
     }
     .probabilityCube {
-        background: linear-gradient(135deg, rgba(94, 235, 172, 0.1) 0%, transparent 100%);
+        background: linear-gradient(135deg, rgba(123, 235, 185, 0.1) 0%, transparent 100%);
     }
 }
