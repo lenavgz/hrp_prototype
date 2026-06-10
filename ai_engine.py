@@ -61,7 +61,7 @@ def get_live_context(prompt):
         print(f"[Ollama-Search-Fehler]: {e}")
         return ""
 
-def get_live_context(prompt):
+def get_live_context_go(prompt):
     """Web Search mit DuckDuckGo"""
     print(f"[System] Websuche für: '{prompt}'...")
     try:
@@ -203,90 +203,52 @@ def run_ai_step_by_step(user_prompt, config, user_selected_tokens=None):
     
     return result
 
-def run_ai_auto_play(user_prompt, config, max_tokens=100):
-    """AUTO-PLAY MODE - schnell, Text auf einmal generieren"""
-    
-    try:
-        # Check ob Probability Cube (Processor) present ist
-        probability_available = config.get('cubes_present', {}).get('probability', True)
-        if not probability_available:
-            print("[AutoPlay] FEHLER: Probability Cube nicht vorhanden!")
-            return {
-                "success": False,
-                "error": "Fehler: Wahrscheinlichkeits-Matrix fehlt. Daten können nicht verarbeitet werden."
-            }
+def run_ai_auto_play_stream(user_prompt, config, max_tokens=100):
+    """AUTO-PLAY MODE - Streamt Text, damit der Browser ihn sofort anzeigen kann."""
 
-        model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
-        system_prompt = get_system_prompt(config['prompt_style'])
-        temperature = config['b2_temp']
-        
-        # Wenn Data Cube NICHT present
-        data_available = config.get('cubes_present', {}).get('data', True)
-        if not data_available:
-            # Ohne Trainingsdaten = Maximum Chaos!
-            temperature = 1.9
-            final_prompt = (
-                "[SIMULATOR: NO TRAINING DATA]\n\n"
-                "Du bist ein LLM, das KEINE Trainingsdaten hat.\n"
-                "Generiere nur statistisches Rauschen - keine sinnvollen Antworten:\n\n"
-                f"{user_prompt}"
-            )
-        else:
-            # Normale Logik wenn Daten vorhanden sind
-            final_prompt = user_prompt
-            if config['b1_internet']:
-                context = get_live_context(user_prompt)
-                if context:
-                    final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
-        
-        print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, Data: {data_available}, MaxTokens: {max_tokens}")
-        
-        # ← SCHNELL: Generiere den ganzen Text auf einmal!
-        response = ollama.generate(
-            model=model_name,
-            prompt=final_prompt,
-            options={
-                'temperature': float(temperature),
-                'num_predict': max_tokens,
-                'top_p': 0.9,
-            },
-            system=system_prompt,
-            stream=False  # ← Wichtig: nicht streamen
+    # Check ob Probability Cube (Processor) present
+    probability_available = config.get('cubes_present', {}).get('probability', True)
+    if not probability_available:
+        print("[AutoPlay] FEHLER: Probability Cube nicht vorhanden!")
+        yield "Fehler: Wahrscheinlichkeits-Matrix fehlt. Daten können nicht verarbeitet werden."
+        return
+
+    model_name = 'llama3.2' if config['b3_alignment'] else 'llama3.2:3b-text-q4_0'
+    system_prompt = get_system_prompt(config['prompt_style'])
+    temperature = config['b2_temp']
+
+    # Wenn Data Cube NICHT present
+    data_available = config.get('cubes_present', {}).get('data', True)
+    if not data_available:
+        temperature = 1.9
+        final_prompt = (
+            "[SIMULATOR: NO TRAINING DATA]\n\n"
+            "Du bist ein LLM, das KEINE Trainingsdaten hat.\n"
+            "Generiere nur statistisches Rauschen - keine sinnvolle Antworten:\n\n"
+            f"{user_prompt}"
         )
-        
-        generated_text = response.get('response', '').strip()
-        
-        # Entferne die Frage aus der Antwort (falls sie mitgegeben wurde)
-        if generated_text.startswith(user_prompt):
-            generated_text = generated_text[len(user_prompt):].strip()
-        
-        # ← OPTIONAL: Wenn Daten weg sind, füge Fehler ein
-        if not data_available:
-            generated_text = introduce_errors(generated_text)
-        
-        tokens_generated = response.get('eval_count', 0)
-        
-        print(f"[AutoPlay] Generated {tokens_generated} tokens")
-        
-        result = {
-            "success": True,
-            "final_text": generated_text,
-            "model_used": model_name,
-            "tokens_generated": tokens_generated,
-            "data_available": data_available, 
-        }
-    
-        if not data_available:
-            result["warning"] = "⚠️ KRITISCHER FEHLER: KEINE TRAININGSDATEN!\n\nDas LLM kann ohne Trainingsdaten nicht funktionieren."
-        
-        return result
-        
-    except Exception as e:
-        print(f"[ERROR] auto-play: {str(e)}")
-        import traceback
-        traceback.print_exc()
-        return {
-            "success": False,
-            "error": str(e)
-        }
+    else:
+        final_prompt = user_prompt
+        if config['b1_internet']:
+            context = get_live_context(user_prompt)
+            if context:
+                final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+
+    print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, Data: {data_available}, MaxTokens: {max_tokens}")
+
+    response = ollama.generate(
+        model=model_name,
+        prompt=final_prompt,
+        options={
+            'temperature': float(temperature),
+            'num_predict': max_tokens,
+            'top_p': 0.9,
+        },
+        system=system_prompt,
+        stream=True
+    )
+
+    for part in response:
+        if getattr(part, 'response', None):
+            yield part.response
     

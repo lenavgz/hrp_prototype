@@ -118,18 +118,26 @@ export default function App() {
                 }),
             });
 
-            const data = await response.json();
-
-            if (!data.success) {
-                setError(data.error);
-                setOutput('');
-                setWarning('');
-                return;
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || 'Serverfehler beim Generieren');
             }
 
-            setOutput(data.final_text);
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let done = false;
+
+            while (!done) {
+                const { value, done: streamDone } = await reader.read();
+                done = streamDone;
+                if (value) {
+                    const chunk = decoder.decode(value, { stream: true });
+                    setOutput(prev => prev + chunk);
+                }
+            }
+
             setError('');
-            setWarning(data.warning || '');
+            setWarning('');
         } catch (error) {
             setError('Verbindungsfehler: ' + error.message);
             setOutput('');

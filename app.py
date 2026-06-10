@@ -1,8 +1,8 @@
 # app.py
 
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Response, stream_with_context
 from hardware_config import get_hardware_config, save_hardware_config
-from ai_engine import run_ai_step_by_step, run_ai_auto_play
+from ai_engine import run_ai_step_by_step, run_ai_auto_play_stream
 import json
 from flask_cors import CORS 
 import json
@@ -91,13 +91,16 @@ def auto_play():
         max_tokens = data.get('max_tokens', 200)
         
         # 3. AN AI ENGINE ÜBERGEBEN
-        result = run_ai_auto_play(
-            user_prompt=user_prompt,
-            config=config,
-            max_tokens=max_tokens
+        return Response(
+            stream_with_context(
+                run_ai_auto_play_stream(
+                    user_prompt=user_prompt,
+                    config=config,
+                    max_tokens=max_tokens
+                )
+            ),
+            content_type='text/plain; charset=utf-8'
         )
-        
-        return jsonify(result)
     
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
