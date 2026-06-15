@@ -181,6 +181,18 @@ body {
     color: #000;
 }
 
+/* Internet Cube Button */
+.mainCubeButton.internet {
+    border-color: var(--color-internet);
+    background-color: rgba(40, 7, 136, 0.15);
+    color: var(--color-text-primary);
+}
+
+.mainCubeButton.internet.active {
+    background-color: rgba(40, 7, 136, 1);
+    color: #fff;
+}
+
 /* RLHF Cube Button */
 .mainCubeButton.rlhf {
     border-color: var(--color-rlhf);

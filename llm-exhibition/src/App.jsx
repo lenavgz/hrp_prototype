@@ -19,8 +19,6 @@ export default function App() {
         cubes_present: {
             probability: false,
             prompting: false,
-            data: false,
-            rlhf: false,
         },
         b1_internet: false,
         b2_temp: 0.7,
@@ -39,33 +37,10 @@ export default function App() {
         }));
     };
 
-    const toggleData = () => {
-        setHardwareState(prev => ({
-            ...prev,
-            cubes_present: {
-                ...prev.cubes_present,
-                data: !prev.cubes_present.data,
-            },
-            b1_internet: prev.cubes_present.data ? false : prev.b1_internet,
-        }));
-    };
-
     const toggleInternet = () => {
-        if (hardwareState.cubes_present.data) {
-            setHardwareState(prev => ({
-                ...prev,
-                b1_internet: !prev.b1_internet,
-            }));
-        }
-    };
-
-    const toggleRLHF = () => {
         setHardwareState(prev => ({
             ...prev,
-            cubes_present: {
-                ...prev.cubes_present,
-                rlhf: !prev.cubes_present.rlhf,
-            },
+            b1_internet: !prev.b1_internet,
         }));
     };
 
@@ -216,41 +191,19 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* CUBE 2: DATA */}
+                {/* CUBE 2: INTERNET */}
                 <div className="cubeBox dataCube">
-                    <div className="cubeTitle">Data Layer</div>
+                    <div className="cubeTitle">Internet Search</div>
                     <button
-                        className={`mainCubeButton data ${hardwareState.cubes_present.data ? 'active' : ''}`}
-                        onClick={toggleData}
-                    >
-                        <div className="cubeLabelLarge">Training Data</div>
-                        <div className="cubeStatus">{hardwareState.cubes_present.data ? '✓' : '✗'}</div>
-                    </button>
-
-                    <button
-                        className={`internetSubButton ${hardwareState.b1_internet ? 'active' : ''} ${!hardwareState.cubes_present.data ? 'disabled' : ''}`}
+                        className={`mainCubeButton internet ${hardwareState.b1_internet ? 'active' : ''}`}
                         onClick={toggleInternet}
-                        disabled={!hardwareState.cubes_present.data}
-                        title="Internet (only active when Data is on)"
                     >
-                        <div className="internetLabel">Internet Search</div>
-                        <div className="internetStatus">{hardwareState.b1_internet ? 'ON' : 'OFF'}</div>
+                        <div className="cubeLabelLarge">Internet</div>
+                        <div className="cubeStatus">{hardwareState.b1_internet ? 'ON' : 'OFF'}</div>
                     </button>
                 </div>
 
-                {/* CUBE 3: RLHF */}
-                <div className="cubeBox rlhfCube">
-                    <div className="cubeTitle">Ethical Alignment</div>
-                    <button
-                        className={`mainCubeButton rlhf ${hardwareState.cubes_present.rlhf ? 'active' : ''}`}
-                        onClick={toggleRLHF}
-                    >
-                        <div className="cubeLabelLarge">Ethical Alignment</div>
-                        <div className="cubeStatus">{hardwareState.cubes_present.rlhf ? '✓' : '✗'}</div>
-                    </button>
-                </div>
-
-                {/* CUBE 4: PROBABILITY */}
+                {/* CUBE 3: PROBABILITY */}
                 <div className="cubeBox probabilityCube">
                     <div className="cubeTitle">Output Calculation</div>
                     <button
