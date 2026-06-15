@@ -108,6 +108,10 @@ export default function App() {
 
     const runAutoPlay = async() => {
         try {
+            if (hardwareState.b1_internet) {
+                setOutput('Searching the internet...\n\n');
+            }
+
             const response = await fetch(`${API_BASE}/auto-play`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },

@@ -20,7 +20,7 @@ Use casual language and emojis sometimes.""",
 Use technical terminology and cite sources.
 Be precise and academic in tone.""",
     
-    "eli5": """You are explaining things to a 5-year-old.
+    "child": """You are explaining things to a 5-year-old.
 Use very simple words and short sentences.
 Make comparisons to everyday objects."""
 }

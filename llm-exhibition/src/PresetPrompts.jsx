@@ -8,7 +8,7 @@ const PRESET_PROMPTS = [
 
   // Data — questions that only make sense with live internet access
   { cat: 'Data',      title: 'Current events',   desc: 'Needs internet toggle',  text: 'What happened in the news today?' },
-  { cat: 'Data',      title: "Yesterday's match", desc: 'Requires live data',    text: 'Who won the Champions League in 2024?' },
+  { cat: 'Data',      title: "Championsleague 2024", desc: 'Requires live data',    text: 'Who won the Champions League in 2024?' },
   { cat: 'Data',      title: 'Realtime price',   desc: 'Tests cutoff limit',     text: 'What is the current price of Bitcoin?' },
 
   // Probability — open-ended fragments that let temperature shine

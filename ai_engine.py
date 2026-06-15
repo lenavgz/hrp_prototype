@@ -1,7 +1,7 @@
 import requests
 import math
 import ollama
-from duckduckgo_search import DDGS
+from ddgs import DDGS
 import os
 from ollama import Client
 from dotenv import load_dotenv
@@ -65,7 +65,7 @@ def get_live_context_go(prompt):
     """Web Search mit DuckDuckGo"""
     print(f"[System] Websuche für: '{prompt}'...")
     try:
-        results = DDGS().text(keywords=prompt, max_results=3)
+        results = DDGS().text(query=prompt, max_results=3)
         snippets = [f"- {r['body']}" for r in results]
         return "\n".join(snippets)
     except Exception as e:
@@ -181,7 +181,7 @@ def run_ai_step_by_step(user_prompt, config, user_selected_tokens=None):
     final_prompt = user_prompt
     if config['b1_internet']:
         print("[AI] Web search ENABLED")
-        context = get_live_context(user_prompt)
+        context = get_live_context_go(user_prompt)
         if context:
             final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
     else:
@@ -230,7 +230,7 @@ def run_ai_auto_play_stream(user_prompt, config, max_tokens=100):
     else:
         final_prompt = user_prompt
         if config['b1_internet']:
-            context = get_live_context(user_prompt)
+            context = get_live_context_go(user_prompt)
             if context:
                 final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
 
