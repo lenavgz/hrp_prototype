@@ -11,6 +11,7 @@ export default function App() {
     const [error, setError] = useState('');
     const [warning, setWarning] = useState('');
     const [alternatives, setAlternatives] = useState([]);
+    const [selectedTokens, setSelectedTokens] = useState([]);
     const [loading, setLoading] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
     const outputRef = useRef(null);
@@ -65,10 +66,11 @@ export default function App() {
         setAlternatives([]);
 
         try {
+            setSelectedTokens([]);
             if (uiMode === 'freeflow') {
                 await runAutoPlay();
             } else {
-                await stepByStep(null);
+                await stepByStep([]);
             }
         } catch (error) {
             console.error('Error:', error);
@@ -125,7 +127,7 @@ export default function App() {
         }
     };
 
-    const stepByStep = async(currentTokenSelection) => {
+    const stepByStep = async(currentTokens) => {
         try {
             const response = await fetch(`${API_BASE}/step-by-step`, {
                 method: 'POST',
@@ -133,7 +135,7 @@ export default function App() {
                 body: JSON.stringify({
                     prompt: prompt,
                     config: hardwareState,
-                    user_selected_tokens: currentTokenSelection ? [currentTokenSelection] : null,
+                    user_selected_tokens: currentTokens,
                 }),
             });
 
@@ -165,8 +167,10 @@ export default function App() {
 
     const handleTokenSelect = async(token) => {
         setLoading(true);
+        const nextTokens = [...selectedTokens, token];
+        setSelectedTokens(nextTokens);
         setOutput(prev => prev + token);
-        await stepByStep(token);
+        await stepByStep(nextTokens);
         setLoading(false);
     };
 
@@ -283,8 +287,10 @@ export default function App() {
 
                             {uiMode === 'wordbyword' && alternatives.length > 0 && (
                                 <div className="alternativesBox">
-                                    <div className="alternativesLabel">Next Token Probabilities:</div>
-                                    <div className="tokenButtons" style={{ display: 'flex', flexDirection: 'column' }}>
+                                    <div className="alternativesLabel">
+                                        {loading ? 'Generating next token… Bitte warten.' : 'Next Token Probabilities:'}
+                                    </div>
+                                    <div className="tokenButtons" style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                                         {alternatives.map((alt, idx) => {
                                             const rawValue =
                                                 alt.logprob !== undefined
@@ -318,6 +324,8 @@ export default function App() {
                                                     disabled={loading}
                                                     style={{
                                                         background: `linear-gradient(90deg, rgba(110, 199, 255, 0.35) ${displayPercent}%, rgba(255, 255, 255, 0.05) ${displayPercent}%)`,
+                                                        cursor: loading ? 'wait' : 'pointer',
+                                                        opacity: loading ? 0.65 : 1,
                                                     }}
                                                 >
                                                     <span style={{ position: 'relative', zIndex: 2 }}>{alt.token}</span>

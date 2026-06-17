@@ -1,6 +1,6 @@
 {
   "cubes_present": {
-    "probability": true,
+    "probability": false,
     "prompting": false
   },
   "b1_internet": false,
