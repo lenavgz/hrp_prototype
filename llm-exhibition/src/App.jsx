@@ -18,7 +18,6 @@ export default function App() {
 
     const [hardwareState, setHardwareState] = useState({
         cubes_present: {
-            probability: false,
             prompting: false,
         },
         b1_internet: false,
@@ -42,16 +41,6 @@ export default function App() {
         setHardwareState(prev => ({
             ...prev,
             b1_internet: !prev.b1_internet,
-        }));
-    };
-
-    const toggleProbability = () => {
-        setHardwareState(prev => ({
-            ...prev,
-            cubes_present: {
-                ...prev.cubes_present,
-                probability: !prev.cubes_present.probability,
-            },
         }));
     };
 
@@ -207,17 +196,6 @@ export default function App() {
                     </button>
                 </div>
 
-                {/* CUBE 3: PROBABILITY */}
-                <div className="cubeBox probabilityCube">
-                    <div className="cubeTitle">Output Calculation</div>
-                    <button
-                        className={`mainCubeButton probability ${hardwareState.cubes_present.probability ? 'active' : ''}`}
-                        onClick={toggleProbability}
-                    >
-                        <div className="cubeLabelLarge">Probability</div>
-                        <div className="cubeStatus">{hardwareState.cubes_present.probability ? '✓' : '✗'}</div>
-                    </button>
-                </div>
             </div>
 
             {/* MAIN CONTENT AREA */}

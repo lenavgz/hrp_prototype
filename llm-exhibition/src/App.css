@@ -206,16 +206,7 @@ body {
 }
 
 /* Probability Cube Button */
-.mainCubeButton.probability {
-    border-color: var(--color-probability);
-    background-color: rgba(123, 235, 185, 0.15);
-    color: var(--color-text-primary);
-}
-
-.mainCubeButton.probability.active {
-    background-color: var(--color-probability);
-    color: #000;
-}
+/* Removed probability button styling */
 
 .cubeLabelLarge {
     font-size: 16px;
