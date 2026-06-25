@@ -18,7 +18,10 @@ export default function App() {
 
     const [hardwareState, setHardwareState] = useState({
         cubes_present: {
-            prompting: false,
+            prompting: true,
+            probability: true,
+            data: true,
+            rlhf: true,
         },
         b1_internet: false,
         b2_temp: 0.7,

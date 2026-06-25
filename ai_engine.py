@@ -65,11 +65,25 @@ def get_live_context_go(prompt):
     """Web Search mit DuckDuckGo"""
     print(f"[System] Websuche für: '{prompt}'...")
     try:
-        results = DDGS().text(query=prompt, max_results=3)
-        snippets = [f"- {r['body']}" for r in results]
-        return "\n".join(snippets)
+        results = DDGS().text(query=prompt, max_results=5)
+        if not results:
+            print(f"[System] Websuche: Keine Ergebnisse gefunden")
+            return ""
+        
+        snippets = []
+        for r in results:
+            if 'body' in r:
+                snippets.append(f"- {r['body']}")
+            if 'title' in r:
+                snippets.append(f"  Titel: {r['title']}")
+        
+        context = "\n".join(snippets)
+        print(f"[System] Websuche erfolgreich: {len(results)} Ergebnisse gefunden")
+        return context
     except Exception as e:
-        print(f"[Error] Web search failed: {e}")
+        print(f"[Error] Websuche fehlgeschlagen: {type(e).__name__}: {e}")
+        import traceback
+        traceback.print_exc()
         return ""
 
 def get_token_with_logprobs(messages, model_name, temperature, system_prompt, num_predict=1, ollama_host='http://localhost:11434'):
@@ -183,7 +197,15 @@ def run_ai_step_by_step(user_prompt, config, user_selected_tokens=None):
         print("[AI] Web search ENABLED")
         context = get_live_context_go(user_prompt)
         if context:
-            final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+            final_prompt = f"""=== LIVE WEB SEARCH RESULTS (USE THIS INFORMATION) ===
+{context}
+=== END OF WEB SEARCH RESULTS ===
+
+User Question: {user_prompt}
+
+INSTRUCTION: Base your answer primarily on the web search results above. This is current/live information."""
+        else:
+            print("[AI] Web search activated but no results found")
     else:
         print("[AI] Web search DISABLED")
     
@@ -230,9 +252,21 @@ def run_ai_auto_play_stream(user_prompt, config, max_tokens=100):
     else:
         final_prompt = user_prompt
         if config['b1_internet']:
+            print("[AutoPlay] Internet-Suche ist aktiviert...")
             context = get_live_context_go(user_prompt)
             if context:
-                final_prompt = f"Context:\n{context}\n\nQuestion: {user_prompt}"
+                print(f"[AutoPlay] Kontext gefunden ({len(context)} Zeichen), füge zu Prompt hinzu")
+                final_prompt = f"""=== LIVE WEB SEARCH RESULTS (USE THIS INFORMATION) ===
+{context}
+=== END OF WEB SEARCH RESULTS ===
+
+User Question: {user_prompt}
+
+INSTRUCTION: Base your answer primarily on the web search results above. This is current/live information."""
+            else:
+                print(f"[AutoPlay] WARNUNG: Internet-Suche war aktiviert, aber es wurden keine Ergebnisse gefunden!")
+        else:
+            print("[AutoPlay] Internet-Suche ist DEAKTIVIERT")
 
     print(f"[AutoPlay] Model: {model_name}, Temp: {temperature}, Data: {data_available}, MaxTokens: {max_tokens}")
 

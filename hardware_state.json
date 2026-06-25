@@ -1,10 +1,13 @@
 {
   "cubes_present": {
-    "prompting": false
+    "prompting": true,
+    "probability": true,
+    "data": true,
+    "rlhf": true
   },
   "b1_internet": false,
   "b2_temp": 0.7,
   "b2_mode": "live",
   "b3_alignment": true,
-  "prompt_style": "standard"
+  "prompt_style": "business"
 }
